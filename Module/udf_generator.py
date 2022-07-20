@@ -68,10 +68,16 @@ class UDFGenerator(object):
                         print("\t getUDF failed!")
                         return False
 
+                    param_name_value_list = []
+                    if z_angle != 0:
+                        param_name_value_list.append(['rotz', z_angle])
+                    if x_angle != 0:
+                        param_name_value_list.append(['rotx', x_angle])
+                    if y_angle != 0:
+                        param_name_value_list.append(['roty', y_angle])
+
                     udf_save_file_path = getFilePath(udf_save_file_basepath,
-                                                     [["rotz", z_angle],
-                                                      ["rotx", x_angle],
-                                                      ["roty", y_angle]],
+                                                     param_name_value_list,
                                                      "npy")
                     if not saveUDF(udf, udf_save_file_path):
                         print("[ERROR][UDFGenerator::generateUDF]")
