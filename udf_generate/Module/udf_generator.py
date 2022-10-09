@@ -48,8 +48,10 @@ class UDFGenerator(object):
         for z_angle in SAMPLE_Z_ANGLE_LIST:
             for x_angle in SAMPLE_X_ANGLE_LIST:
                 for y_angle in SAMPLE_Y_ANGLE_LIST:
-                    udf = self.getUDF(z_angle, x_angle, y_angle)
+                    if x_angle == 0 and y_angle == 0 and z_angle == 0:
+                        continue
 
+                    udf = self.getUDF(z_angle, x_angle, y_angle)
                     assert udf is not None
 
                     param_name_value_list = []
@@ -61,7 +63,11 @@ class UDFGenerator(object):
                         param_name_value_list.append(['roty', y_angle])
 
                     udf_save_file_path = getFilePath(udf_save_file_basepath,
-                                                     param_name_value_list,
-                                                     "npy")
+                                                     param_name_value_list)
                     saveUDF(udf, udf_save_file_path)
+
+        udf = self.getUDF(0, 0, 0)
+        assert udf is not None
+        udf_save_file_path = getFilePath(udf_save_file_basepath)
+        saveUDF(udf, udf_save_file_path)
         return True
