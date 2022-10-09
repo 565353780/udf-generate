@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from Module.udf_generator_with_pool import demo
+from udf_generate.Demo.udf_generator import demo as demo_generate_udf
+from udf_generate.Demo.udf_generate_manager import demo as demo_generate_udf_folder
 
 if __name__ == "__main__":
-    demo()
-
+    #  demo_generate_udf()
+    demo_generate_udf_folder()
