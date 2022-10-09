@@ -6,26 +6,27 @@ import numpy as np
 import open3d as o3d
 from math import pi
 
-from Config.sample import SAMPLE_POINT_MATRIX
+from udf_generate.Config.sample import SAMPLE_POINT_MATRIX
 
-from Method.paths import createFileFolder
+from udf_generate.Method.paths import createFileFolder
+
 
 def getRad(angle):
     rad = angle * pi / 180.0
     return rad
 
+
 def getAngle(rad):
     angle = rad * 180.0 / pi
     return angle
 
+
 def loadMesh(mesh_file_path):
-    if not os.path.exists(mesh_file_path):
-        print("[ERROR][udfs::loadMesh]")
-        print("\t mesh_file not exist!")
-        return None
+    assert os.path.exists(mesh_file_path)
 
     mesh = o3d.io.read_triangle_mesh(mesh_file_path)
     return mesh
+
 
 def getMeshBBox(mesh):
     bbox = mesh.get_axis_aligned_bounding_box()
@@ -33,6 +34,7 @@ def getMeshBBox(mesh):
     max_bound = bbox.get_max_bound()
     min_bound = bbox.get_min_bound()
     return min_bound, max_bound
+
 
 def getMeshBBoxCenter(mesh):
     min_bound, max_bound = getMeshBBox(mesh)
@@ -42,13 +44,16 @@ def getMeshBBoxCenter(mesh):
               (min_bound[2] + max_bound[2]) / 2.0]
     return center
 
+
 def getMeshBBoxDiff(mesh):
     min_bound, max_bound = getMeshBBox(mesh)
 
-    diff = [max_bound[0] - min_bound[0],
-              max_bound[1] - min_bound[1],
-              max_bound[2] - min_bound[2]]
+    diff = [
+        max_bound[0] - min_bound[0], max_bound[1] - min_bound[1],
+        max_bound[2] - min_bound[2]
+    ]
     return diff
+
 
 def translateMesh(mesh, z_diff=0, x_diff=0, y_diff=0):
     if z_diff == 0 and x_diff == 0 and y_diff == 0:
@@ -56,6 +61,7 @@ def translateMesh(mesh, z_diff=0, x_diff=0, y_diff=0):
 
     mesh.translate((z_diff, x_diff, y_diff))
     return True
+
 
 def rotateMesh(mesh, z_angle=0, x_angle=0, y_angle=0):
     if z_angle == 0 and x_angle == 0 and y_angle == 0:
@@ -69,12 +75,14 @@ def rotateMesh(mesh, z_angle=0, x_angle=0, y_angle=0):
     mesh.rotate(R, center=mesh.get_center())
     return True
 
+
 def scaleMesh(mesh, scale=1):
     if scale == 1:
         return True
 
     mesh.scale(scale, center=mesh.get_center())
     return True
+
 
 def normalizeMesh(mesh):
     diff = getMeshBBoxDiff(mesh)
@@ -85,54 +93,51 @@ def normalizeMesh(mesh):
     translateMesh(mesh, -bbox_center[0], -bbox_center[1], -bbox_center[2])
     return True
 
+
 def getRaycastingScene(mesh):
     mesh = o3d.t.geometry.TriangleMesh.from_legacy(mesh)
     scene = o3d.t.geometry.RaycastingScene()
     _ = scene.add_triangles(mesh)
     return scene
 
+
 def getPointDistListToMesh(scene, point_list):
-    query_point_list = o3d.core.Tensor(point_list, dtype=o3d.core.Dtype.Float32)
+    query_point_list = o3d.core.Tensor(point_list,
+                                       dtype=o3d.core.Dtype.Float32)
     unsigned_distance_list = scene.compute_distance(query_point_list).numpy()
     return unsigned_distance_list
 
+
 def getSignedPointDistListToMesh(scene, point_list):
-    query_point_list = o3d.core.Tensor(point_list, dtype=o3d.core.Dtype.Float32)
-    signed_distance_list = scene.compute_signed_distance(query_point_list).numpy()
+    query_point_list = o3d.core.Tensor(point_list,
+                                       dtype=o3d.core.Dtype.Float32)
+    signed_distance_list = scene.compute_signed_distance(
+        query_point_list).numpy()
     return signed_distance_list
 
-def saveUDF(udf, udf_save_file_path):
-    if udf is None:
-        print("[ERROR][udfs::saveUDF]")
-        print("\t udf is None!")
-        return False
 
-    if not createFileFolder(udf_save_file_path):
-        print("[ERROR][udfs::saveUDF]")
-        print("\t createFileFolder failed!")
-        return False
+def saveUDF(udf, udf_save_file_path):
+    assert udf is not None
+
+    createFileFolder(udf_save_file_path)
 
     np.save(udf_save_file_path, udf)
     return True
 
+
 def loadUDF(udf_file_path):
-    if not os.path.exists(udf_file_path):
-        print("[ERROR][udfs::loadUDF]")
-        print("\t udf_file not exist!")
-        return None
+    assert os.path.exists(udf_file_path)
 
     udf = np.load(udf_file_path)
     return udf
+
 
 def visualUDF(udf_file_path):
     dist_max = 10.0
 
     udf = loadUDF(udf_file_path)
 
-    if udf is None:
-        print("[ERROR][udfs::visualUDF]")
-        print("\t loadUDF failed!")
-        return False
+    assert udf is not None
 
     point_list = []
     dist_list = []
@@ -151,9 +156,8 @@ def visualUDF(udf_file_path):
     color_list = []
     for dist in dist_list:
         color_weight = 1.0 * dist / max_dist
-        color_list.append([color_weight * 255,
-                           color_weight * 255,
-                           color_weight * 255])
+        color_list.append(
+            [color_weight * 255, color_weight * 255, color_weight * 255])
 
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(point_list)
@@ -161,4 +165,3 @@ def visualUDF(udf_file_path):
 
     o3d.visualization.draw_geometries([pcd])
     return True
-
