@@ -59,6 +59,8 @@ class UDFGenerateManager(object):
                 mesh_label_path + mesh_file_basename + "/udf"
             inputs_list.append([mesh_file_path, udf_save_file_basepath])
 
+        print("[INFO][UDFGenerateManager::generateAllUDF]")
+        print("\t start running generateSingleUDF...")
         for inputs in tqdm(inputs_list):
             self.generateSingleUDF(inputs)
         return True
