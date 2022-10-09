@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
-from multiprocessing import Pool
 from tqdm import tqdm
+from multiprocessing import Pool
+
+from udf_generate.Method.paths import renameFile
 
 from udf_generate.Module.udf_generator import UDFGenerator
 
@@ -25,6 +27,8 @@ class UDFGenerateManager(object):
 
         print("[INFO][UDFGenerateManager::loadMeshFilePathList]")
         print("\t start load mesh file path list...")
+        # FIXME: only for shapenet core v2
+        pbar = tqdm(total=52472)
         for root, _, files in os.walk(self.mesh_root_folder_path):
             for file_name in files:
                 if file_name[-4:] != ".obj":
@@ -34,7 +38,10 @@ class UDFGenerateManager(object):
                 if not os.path.exists(file_path):
                     continue
 
+                pbar.update(1)
                 self.mesh_file_path_list.append(file_path)
+
+        pbar.close()
         return True
 
     def generateSingleUDF(self, inputs):
@@ -44,8 +51,25 @@ class UDFGenerateManager(object):
         assert len(inputs) == 2
 
         mesh_file_path, udf_save_file_basepath = inputs
-        udf_generator = UDFGenerator(mesh_file_path)
-        udf_generator.generateUDF(udf_save_file_basepath)
+
+        udf_basename = udf_save_file_basepath.split("/")[-1]
+        udf_save_folder_path = udf_save_file_basepath[:-len(udf_basename)]
+        if os.path.exists(udf_save_folder_path):
+            return True
+
+        tmp_udf_save_folder_path = udf_save_folder_path[:-1] + "_tmp/"
+        tmp_udf_save_file_basepath = tmp_udf_save_folder_path + udf_basename
+
+        try:
+            udf_generator = UDFGenerator(mesh_file_path)
+            udf_generator.generateUDF(tmp_udf_save_file_basepath)
+        except:
+            print("[ERROR][UDFGenerateManager::generateSingleUDF]")
+            print("\t generateUDF failed!")
+            print("\t", mesh_file_path)
+            return False
+
+        renameFile(tmp_udf_save_folder_path, udf_save_folder_path)
         return True
 
     def generateAllUDF(self, udf_save_root_folder_path):
