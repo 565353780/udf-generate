@@ -23,6 +23,8 @@ class UDFGenerateManager(object):
     def loadMeshFilePathList(self):
         assert os.path.exists(self.mesh_root_folder_path)
 
+        print("[INFO][UDFGenerateManager::loadMeshFilePathList]")
+        print("\t start load mesh file path list...")
         for root, _, files in os.walk(self.mesh_root_folder_path):
             for file_name in files:
                 if file_name[-4:] != ".obj":
