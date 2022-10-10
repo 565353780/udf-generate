@@ -9,26 +9,26 @@ from udf_generate.Method.paths import renameFile
 
 from udf_generate.Module.udf_generator import UDFGenerator
 
+# FIXME: only for shapenet core v2, fail to load
+skip_idx_list = [1052, 1979]
+mesh_total_num = 52472
 
 class UDFGenerateManager(object):
 
     def __init__(self, mesh_root_folder_path, processes=os.cpu_count()):
-        self.processes = processes
-
         self.mesh_root_folder_path = mesh_root_folder_path
-
-        self.mesh_file_path_list = []
-
-        self.loadMeshFilePathList()
+        self.processes = processes
         return
 
-    def loadMeshFilePathList(self):
+    def getMeshFilePathList(self):
         assert os.path.exists(self.mesh_root_folder_path)
 
-        print("[INFO][UDFGenerateManager::loadMeshFilePathList]")
+        mesh_file_path_list = []
+
+        print("[INFO][UDFGenerateManager::getMeshFilePathList]")
         print("\t start load mesh file path list...")
-        # FIXME: only for shapenet core v2
-        pbar = tqdm(total=52472)
+        pbar = tqdm(total=mesh_total_num)
+        loaded_mesh_num = 0
         for root, _, files in os.walk(self.mesh_root_folder_path):
             for file_name in files:
                 if file_name[-4:] != ".obj":
@@ -38,11 +38,18 @@ class UDFGenerateManager(object):
                 if not os.path.exists(file_path):
                     continue
 
+                if loaded_mesh_num in skip_idx_list:
+                    loaded_mesh_num += 1
+                    pbar.update(1)
+                    continue
+
+                mesh_file_path_list.append(file_path)
+
                 pbar.update(1)
-                self.mesh_file_path_list.append(file_path)
+                loaded_mesh_num += 1
 
         pbar.close()
-        return True
+        return mesh_file_path_list
 
     def generateSingleUDF(self, inputs):
         '''
@@ -60,21 +67,52 @@ class UDFGenerateManager(object):
         tmp_udf_save_folder_path = udf_save_folder_path[:-1] + "_tmp/"
         tmp_udf_save_file_basepath = tmp_udf_save_folder_path + udf_basename
 
-        try:
-            udf_generator = UDFGenerator(mesh_file_path)
-            udf_generator.generateUDF(tmp_udf_save_file_basepath)
-        except:
-            print("[ERROR][UDFGenerateManager::generateSingleUDF]")
-            print("\t generateUDF failed!")
-            print("\t", mesh_file_path)
-            return False
+        udf_generator = UDFGenerator(mesh_file_path)
+        udf_generator.generateUDF(tmp_udf_save_file_basepath)
 
         renameFile(tmp_udf_save_folder_path, udf_save_folder_path)
         return True
 
+    def activeGenerateAllUDF(self, udf_save_root_folder_path):
+        assert os.path.exists(self.mesh_root_folder_path)
+
+        print("[INFO][UDFGenerateManager::activeGenerateAllUDF]")
+        print("\t start load mesh file path and generate udf...")
+        pbar = tqdm(total=mesh_total_num)
+        loaded_mesh_num = 0
+        for root, _, files in os.walk(self.mesh_root_folder_path):
+            for file_name in files:
+                if file_name[-4:] != ".obj":
+                    continue
+
+                file_path = root + "/" + file_name
+                if not os.path.exists(file_path):
+                    continue
+
+                if loaded_mesh_num in skip_idx_list:
+                    loaded_mesh_num += 1
+                    pbar.update(1)
+                    continue
+
+                mesh_file_basename = file_name[:-4]
+                mesh_label_path = file_path.replace(
+                    self.mesh_root_folder_path, "").replace(file_name, "")
+                udf_save_file_basepath = udf_save_root_folder_path + \
+                    mesh_label_path + mesh_file_basename + "/udf"
+                inputs = [file_path, udf_save_file_basepath]
+                self.generateSingleUDF(inputs)
+
+                pbar.update(1)
+                loaded_mesh_num += 1
+
+        pbar.close()
+        return True
+
     def generateAllUDF(self, udf_save_root_folder_path):
+        mesh_file_path_list = self.getMeshFilePathList()
+
         inputs_list = []
-        for mesh_file_path in self.mesh_file_path_list:
+        for mesh_file_path in mesh_file_path_list:
             mesh_file_name = mesh_file_path.split("/")[-1]
             mesh_file_basename = mesh_file_name[:-4]
             mesh_label_path = mesh_file_path.replace(
