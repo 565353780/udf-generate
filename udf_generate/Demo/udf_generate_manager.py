@@ -9,5 +9,6 @@ def demo():
     udf_save_root_folder_path = "/home/chli/chLi/ShapeNet/udfs/"
 
     udf_generate_manager = UDFGenerateManager(mesh_root_folder_path)
-    udf_generate_manager.generateAllUDF(udf_save_root_folder_path)
+    udf_generate_manager.activeGenerateAllUDF(udf_save_root_folder_path)
+    #  udf_generate_manager.generateAllUDF(udf_save_root_folder_path)
     return True
