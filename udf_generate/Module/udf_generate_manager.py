@@ -9,8 +9,7 @@ from udf_generate.Method.paths import renameFile
 
 from udf_generate.Module.udf_generator import UDFGenerator
 
-# FIXME: only for shapenet core v2, fail to load
-skip_idx_list = [1052, 1979]
+# FIXME: only for shapenet core v2
 mesh_total_num = 52472
 
 class UDFGenerateManager(object):
@@ -28,7 +27,6 @@ class UDFGenerateManager(object):
         print("[INFO][UDFGenerateManager::getMeshFilePathList]")
         print("\t start load mesh file path list...")
         pbar = tqdm(total=mesh_total_num)
-        loaded_mesh_num = 0
         for root, _, files in os.walk(self.mesh_root_folder_path):
             for file_name in files:
                 if file_name[-4:] != ".obj":
@@ -38,15 +36,8 @@ class UDFGenerateManager(object):
                 if not os.path.exists(file_path):
                     continue
 
-                if loaded_mesh_num in skip_idx_list:
-                    loaded_mesh_num += 1
-                    pbar.update(1)
-                    continue
-
                 mesh_file_path_list.append(file_path)
-
                 pbar.update(1)
-                loaded_mesh_num += 1
 
         pbar.close()
         return mesh_file_path_list
@@ -79,7 +70,6 @@ class UDFGenerateManager(object):
         print("[INFO][UDFGenerateManager::activeGenerateAllUDF]")
         print("\t start load mesh file path and generate udf...")
         pbar = tqdm(total=mesh_total_num)
-        loaded_mesh_num = 0
         for root, _, files in os.walk(self.mesh_root_folder_path):
             for file_name in files:
                 if file_name[-4:] != ".obj":
@@ -87,11 +77,6 @@ class UDFGenerateManager(object):
 
                 file_path = root + "/" + file_name
                 if not os.path.exists(file_path):
-                    continue
-
-                if loaded_mesh_num in skip_idx_list:
-                    loaded_mesh_num += 1
-                    pbar.update(1)
                     continue
 
                 mesh_file_basename = file_name[:-4]
@@ -103,7 +88,6 @@ class UDFGenerateManager(object):
                 self.generateSingleUDF(inputs)
 
                 pbar.update(1)
-                loaded_mesh_num += 1
 
         pbar.close()
         return True
