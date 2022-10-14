@@ -1,44 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from udf_generate.Config.sample import \
-    SAMPLE_POINT_MATRIX, SAMPLE_Z_ANGLE_LIST, \
-    SAMPLE_X_ANGLE_LIST, SAMPLE_Y_ANGLE_LIST
+from udf_generate.Config.sample import SAMPLE_Z_ANGLE_LIST, SAMPLE_X_ANGLE_LIST, SAMPLE_Y_ANGLE_LIST
 
 from udf_generate.Method.paths import createFileFolder, getFilePath
-from udf_generate.Method.udfs import \
-    loadMesh, normalizeMesh, rotateMesh, \
-    getRaycastingScene, getPointDistListToMesh, \
-    saveUDF
+from udf_generate.Method.udfs import loadMesh, getUDF, saveUDF
 
 
 class UDFGenerator(object):
 
-    def __init__(self, mesh_file_path=None):
+    def __init__(self, mesh_file_path, trans_matrix=None):
         self.mesh = None
 
         if mesh_file_path is not None:
-            self.loadMesh(mesh_file_path)
+            self.loadMesh(mesh_file_path, trans_matrix)
         return
 
-    def loadMesh(self, mesh_file_path):
-        self.mesh = loadMesh(mesh_file_path)
-
-        assert self.mesh is not None
-
-        normalizeMesh(self.mesh)
+    def loadMesh(self, mesh_file_path, trans_matrix=None):
+        self.mesh = loadMesh(mesh_file_path, trans_matrix)
         return True
 
     def getUDF(self, z_angle=0, x_angle=0, y_angle=0):
-        assert self.mesh is not None
-
-        rotateMesh(self.mesh, z_angle, x_angle, y_angle)
-
-        scene = getRaycastingScene(self.mesh)
-        udf = getPointDistListToMesh(scene, SAMPLE_POINT_MATRIX)
-
-        rotateMesh(self.mesh, -z_angle, -x_angle, -y_angle)
-        return udf
+        return getUDF(self.mesh, z_angle, x_angle, y_angle)
 
     def generateUDF(self, udf_save_file_basepath):
         createFileFolder(udf_save_file_basepath)
