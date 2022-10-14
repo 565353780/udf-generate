@@ -168,11 +168,7 @@ def loadUDF(udf_file_path):
     return udf
 
 
-def visualUDF(udf_file_path):
-    dist_max = 10.0
-
-    udf = loadUDF(udf_file_path)
-
+def getVisualUDF(udf, dist_max=10.0):
     point_list = []
     dist_list = []
 
@@ -196,6 +192,4 @@ def visualUDF(udf_file_path):
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(point_list)
     pcd.colors = o3d.utility.Vector3dVector(color_list)
-
-    o3d.visualization.draw_geometries([pcd])
-    return True
+    return pcd
