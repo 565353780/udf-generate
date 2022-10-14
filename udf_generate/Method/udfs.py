@@ -82,6 +82,22 @@ def rotateMesh(mesh, z_angle=0, x_angle=0, y_angle=0):
     return True
 
 
+def invRotateMesh(mesh, z_angle=0, x_angle=0, y_angle=0):
+    if z_angle != 0:
+        z_rad = getRad(z_angle)
+        R = mesh.get_rotation_matrix_from_xyz((-z_rad, 0, 0))
+        mesh.rotate(R, center=mesh.get_center())
+    if x_angle != 0:
+        x_rad = getRad(x_angle)
+        R = mesh.get_rotation_matrix_from_xyz((0, -x_rad, 0))
+        mesh.rotate(R, center=mesh.get_center())
+    if y_angle != 0:
+        y_rad = getRad(y_angle)
+        R = mesh.get_rotation_matrix_from_xyz((0, 0, -y_rad))
+        mesh.rotate(R, center=mesh.get_center())
+    return True
+
+
 def scaleMesh(mesh, scale=1):
     if scale == 1:
         return True
