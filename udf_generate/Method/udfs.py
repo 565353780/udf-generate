@@ -5,6 +5,7 @@ import os
 import numpy as np
 import open3d as o3d
 from math import pi
+from copy import deepcopy
 
 from udf_generate.Config.sample import SAMPLE_POINT_MATRIX
 
@@ -21,10 +22,15 @@ def getAngle(rad):
     return angle
 
 
-def loadMesh(mesh_file_path):
+def loadMesh(mesh_file_path, trans_matrix=None):
     assert os.path.exists(mesh_file_path)
 
     mesh = o3d.io.read_triangle_mesh(mesh_file_path)
+
+    assert mesh is not None
+
+    if trans_matrix is not None:
+        mesh.transform(trans_matrix)
     return mesh
 
 
@@ -104,8 +110,8 @@ def getRaycastingScene(mesh):
 def getPointDistListToMesh(scene, point_list):
     query_point_list = o3d.core.Tensor(point_list,
                                        dtype=o3d.core.Dtype.Float32)
-    unsigned_distance_list = scene.compute_distance(query_point_list).numpy()
-    return unsigned_distance_list
+    unsigned_distance_array = scene.compute_distance(query_point_list).numpy()
+    return unsigned_distance_array
 
 
 def getSignedPointDistListToMesh(scene, point_list):
@@ -114,6 +120,18 @@ def getSignedPointDistListToMesh(scene, point_list):
     signed_distance_list = scene.compute_signed_distance(
         query_point_list).numpy()
     return signed_distance_list
+
+
+def getUDF(mesh, z_angle=0, x_angle=0, y_angle=0):
+    assert mesh is not None
+
+    copy_mesh = deepcopy(mesh)
+    rotateMesh(copy_mesh, z_angle, x_angle, y_angle)
+    normalizeMesh(copy_mesh)
+
+    scene = getRaycastingScene(copy_mesh)
+    udf = getPointDistListToMesh(scene, SAMPLE_POINT_MATRIX)
+    return udf
 
 
 def saveUDF(udf, udf_save_file_path):
@@ -129,6 +147,8 @@ def loadUDF(udf_file_path):
     assert os.path.exists(udf_file_path)
 
     udf = np.load(udf_file_path)
+
+    assert udf is not None
     return udf
 
 
@@ -136,8 +156,6 @@ def visualUDF(udf_file_path):
     dist_max = 10.0
 
     udf = loadUDF(udf_file_path)
-
-    assert udf is not None
 
     point_list = []
     dist_list = []
