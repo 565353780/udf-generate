@@ -4,7 +4,7 @@
 from udf_generate.Config.sample import SAMPLE_Z_ANGLE_LIST, SAMPLE_X_ANGLE_LIST, SAMPLE_Y_ANGLE_LIST
 
 from udf_generate.Method.paths import createFileFolder, getFilePath
-from udf_generate.Method.udfs import loadMesh, getUDF, saveUDF
+from udf_generate.Method.udfs import loadMesh, getUDF, saveUDF, getVisualUDF
 
 
 class UDFGenerator(object):
@@ -22,6 +22,15 @@ class UDFGenerator(object):
 
     def getUDF(self, z_angle=0, x_angle=0, y_angle=0):
         return getUDF(self.mesh, z_angle, x_angle, y_angle)
+
+    def getVisualUDF(self, z_angle=0, x_angle=0, y_angle=0, dist_max=10.0):
+        return getVisualUDF(self.getUDF(z_angle, x_angle, y_angle), dist_max)
+
+    def renderUDF(self, z_angle=0, x_angle=0, y_angle=0, dist_max=10.0):
+        visual_udf = getVisualUDF(self.getUDF(z_angle, x_angle, y_angle),
+                                  dist_max)
+        o3d.visualization.draw_geometries([visual_udf])
+        return True
 
     def generateUDF(self, udf_save_file_basepath):
         createFileFolder(udf_save_file_basepath)
