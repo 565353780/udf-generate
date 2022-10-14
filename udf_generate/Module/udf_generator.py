@@ -15,8 +15,6 @@ from udf_generate.Method.udfs import \
 class UDFGenerator(object):
 
     def __init__(self, mesh_file_path=None):
-        self.mesh_file_path = mesh_file_path
-
         self.mesh = None
 
         if mesh_file_path is not None:
