@@ -62,16 +62,16 @@ def getMeshBBoxDiff(mesh):
     return diff
 
 
-def translateMesh(mesh, z_diff=0, x_diff=0, y_diff=0):
-    if z_diff == 0 and x_diff == 0 and y_diff == 0:
+def translateMesh(mesh, z_diff=0.0, x_diff=0.0, y_diff=0.0):
+    if z_diff == 0.0 and x_diff == 0.0 and y_diff == 0.0:
         return True
 
     mesh.translate((z_diff, x_diff, y_diff))
     return True
 
 
-def rotateMesh(mesh, z_angle=0, x_angle=0, y_angle=0):
-    if z_angle == 0 and x_angle == 0 and y_angle == 0:
+def rotateMesh(mesh, z_angle=0.0, x_angle=0.0, y_angle=0.0):
+    if z_angle == 0.0 and x_angle == 0.0 and y_angle == 0.0:
         return True
 
     z_rad = getRad(z_angle)
@@ -83,18 +83,18 @@ def rotateMesh(mesh, z_angle=0, x_angle=0, y_angle=0):
     return True
 
 
-def invRotateMesh(mesh, z_angle=0, x_angle=0, y_angle=0):
-    if z_angle != 0:
+def invRotateMesh(mesh, z_angle=0.0, x_angle=0.0, y_angle=0.0):
+    if z_angle != 0.0:
         z_rad = getRad(z_angle)
-        R = mesh.get_rotation_matrix_from_xyz((-z_rad, 0, 0))
+        R = mesh.get_rotation_matrix_from_xyz((-z_rad, 0.0, 0.0))
         mesh.rotate(R, center=mesh.get_center())
-    if x_angle != 0:
+    if x_angle != 0.0:
         x_rad = getRad(x_angle)
-        R = mesh.get_rotation_matrix_from_xyz((0, -x_rad, 0))
+        R = mesh.get_rotation_matrix_from_xyz((0.0, -x_rad, 0.0))
         mesh.rotate(R, center=mesh.get_center())
-    if y_angle != 0:
+    if y_angle != 0.0:
         y_rad = getRad(y_angle)
-        R = mesh.get_rotation_matrix_from_xyz((0, 0, -y_rad))
+        R = mesh.get_rotation_matrix_from_xyz((0.0, 0.0, -y_rad))
         mesh.rotate(R, center=mesh.get_center())
     return True
 
@@ -139,7 +139,7 @@ def getSignedPointDistListToMesh(scene, point_list):
     return signed_distance_list
 
 
-def getUDF(mesh, z_angle=0, x_angle=0, y_angle=0):
+def getUDF(mesh, z_angle=0.0, x_angle=0.0, y_angle=0.0):
     assert mesh is not None
 
     copy_mesh = deepcopy(mesh)
@@ -151,7 +151,7 @@ def getUDF(mesh, z_angle=0, x_angle=0, y_angle=0):
     return udf
 
 
-def getPointUDF(point_array, z_angle=0, x_angle=0, y_angle=0):
+def getPointUDF(point_array, z_angle=0.0, x_angle=0.0, y_angle=0.0):
     assert point_array is not None
 
     copy_point_array = deepcopy(point_array)
@@ -185,7 +185,7 @@ def loadUDF(udf_file_path):
     return udf
 
 
-def getVisualUDF(udf, dist_max=10.0):
+def getVisualUDF(udf, dist_max=0.02):
     point_list = []
     dist_list = []
 
@@ -198,13 +198,7 @@ def getVisualUDF(udf, dist_max=10.0):
                 point_list.append(SAMPLE_POINT_MATRIX[z_idx][x_idx][y_idx])
                 dist_list.append(udf_value)
 
-    max_dist = np.max(dist_list)
-
-    color_list = []
-    for dist in dist_list:
-        color_weight = 1.0 * dist / max_dist
-        color_list.append(
-            [color_weight * 255, color_weight * 255, color_weight * 255])
+    color_list = [[255, 0, 0] for _ in dist_list]
 
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(point_list)
