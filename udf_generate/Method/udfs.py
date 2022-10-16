@@ -10,7 +10,7 @@ from copy import deepcopy
 from udf_generate.Config.sample import SAMPLE_NUM, SAMPLE_POINT_MATRIX, SAMPLE_POINT_CLOUD
 
 from udf_generate.Method.paths import createFileFolder
-from udf_generate.Method.samples import getArrayFromMatrix, getMatrixFromArray
+from udf_generate.Method.samples import getMatrixFromArray
 
 
 def getRad(angle):
