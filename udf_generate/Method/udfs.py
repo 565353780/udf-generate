@@ -7,9 +7,10 @@ import open3d as o3d
 from math import pi
 from copy import deepcopy
 
-from udf_generate.Config.sample import SAMPLE_POINT_MATRIX
+from udf_generate.Config.sample import SAMPLE_NUM, SAMPLE_POINT_MATRIX, SAMPLE_POINT_CLOUD
 
 from udf_generate.Method.paths import createFileFolder
+from udf_generate.Method.samples import getArrayFromMatrix, getMatrixFromArray
 
 
 def getRad(angle):
@@ -148,6 +149,22 @@ def getUDF(mesh, z_angle=0, x_angle=0, y_angle=0):
     scene = getRaycastingScene(copy_mesh)
     udf = getPointDistListToMesh(scene, SAMPLE_POINT_MATRIX)
     return udf
+
+
+def getPointUDF(point_array, z_angle=0, x_angle=0, y_angle=0):
+    assert point_array is not None
+
+    copy_point_array = deepcopy(point_array)
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(copy_point_array)
+    rotateMesh(pcd, z_angle, x_angle, y_angle)
+    normalizeMesh(pcd)
+
+    dist_array = np.array(SAMPLE_POINT_CLOUD.compute_point_cloud_distance(pcd))
+
+    point_udf = getMatrixFromArray(dist_array, SAMPLE_NUM, 1)
+    return point_udf
 
 
 def saveUDF(udf, udf_save_file_path):
