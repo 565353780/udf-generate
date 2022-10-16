@@ -21,3 +21,13 @@ def getSamplePointMatrix(sample_num):
                     z_value, x_value, y_value
                 ]
     return sample_point_matrix
+
+def getArrayFromMatrix(matrix, data_num):
+    if data_num == 1:
+        return matrix.reshape(-1)
+    return matrix.reshape(-1, data_num)
+
+def getMatrixFromArray(array, matrix_size, data_num):
+    if data_num == 1:
+        return array.reshape(matrix_size, matrix_size, matrix_size)
+    return array.reshape(matrix_size, matrix_size, matrix_size, data_num)
