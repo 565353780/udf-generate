@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import os
+from copy import deepcopy
+from math import pi
+
 import numpy as np
 import open3d as o3d
-from math import pi
-from copy import deepcopy
+import torch
 
-from udf_generate.Config.sample import SAMPLE_NUM, SAMPLE_POINT_MATRIX, SAMPLE_POINT_CLOUD
-
+from udf_generate.Config.sample import (SAMPLE_NUM, SAMPLE_POINT_CLOUD,
+                                        SAMPLE_POINT_MATRIX)
 from udf_generate.Method.paths import createFileFolder
 from udf_generate.Method.samples import getMatrixFromArray
 
@@ -151,8 +153,32 @@ def getUDF(mesh, z_angle=0.0, x_angle=0.0, y_angle=0.0):
     return udf
 
 
+def getPointUDFTensor(point_array_tensor,
+                      z_angle=0.0,
+                      x_angle=0.0,
+                      y_angle=0.0):
+    device = point_array_tensor.device
+
+    copy_point_array = deepcopy(point_array_tensor.detach().cpu().numpy())
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(copy_point_array)
+    rotateMesh(pcd, z_angle, x_angle, y_angle)
+    normalizeMesh(pcd)
+
+    dist_array = np.array(SAMPLE_POINT_CLOUD.compute_point_cloud_distance(pcd))
+
+    point_udf = getMatrixFromArray(dist_array, SAMPLE_NUM, 1)
+
+    point_udf_tensor = torch.from_numpy(point_udf).to(torch.float32).to(device)
+    return point_udf_tensor
+
+
 def getPointUDF(point_array, z_angle=0.0, x_angle=0.0, y_angle=0.0):
     assert point_array is not None
+
+    if isinstance(point_array, torch.Tensor):
+        return getPointUDFTensor(point_array, z_angle, x_angle, y_angle)
 
     copy_point_array = deepcopy(point_array)
 
