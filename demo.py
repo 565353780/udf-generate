@@ -1,11 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-from udf_generate.Demo.udf_generator import demo as demo_generate_udf
-from udf_generate.Demo.udf_generate_manager import demo as demo_generate_udf_folder
-from udf_generate.Demo.render import demo as demo_render
+from udf_generate.Demo.udf_manager import (
+    demo_pcd as demo_generate_pcd_udf,
+    demo_mesh as demo_generate_mesh_udf,
+)
 
 if __name__ == "__main__":
-    #  demo_generate_udf()
-    #  demo_generate_udf_folder()
-    demo_render()
+    demo_generate_pcd_udf()
+    # demo_generate_mesh_udf()

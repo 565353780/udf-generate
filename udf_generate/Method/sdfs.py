@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import os
 import trimesh
 from mesh_to_sdf import mesh_to_voxels
