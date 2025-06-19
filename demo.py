@@ -4,5 +4,5 @@ from udf_generate.Demo.udf_manager import (
 )
 
 if __name__ == "__main__":
-    demo_generate_pcd_udf()
-    # demo_generate_mesh_udf()
+    # demo_generate_pcd_udf()
+    demo_generate_mesh_udf()

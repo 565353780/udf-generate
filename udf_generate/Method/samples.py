@@ -14,4 +14,3 @@ def getSamplePointMatrix(sample_num):
     sample_point_matrix = np.stack([z_grid, x_grid, y_grid], axis=-1)
 
     return sample_point_matrix
-

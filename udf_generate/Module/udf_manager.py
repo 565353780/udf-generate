@@ -5,7 +5,7 @@ from typing import Union
 
 from udf_generate.Method.io import loadUDF, saveUDF
 from udf_generate.Method.pts_udf import toPtsUDF
-from udf_generate.Method.mesh_udf import toMeshUDF
+from udf_generate.Method.mesh_udf import toMeshUDF, toMeshUDFCPP
 from udf_generate.Method.render import toUDFPcd, renderUDF
 
 
@@ -32,6 +32,10 @@ class UDFManager(object):
     @staticmethod
     def toMeshUDF(mesh: o3d.geometry.TriangleMesh) -> np.ndarray:
         return toMeshUDF(mesh)
+
+    @staticmethod
+    def toMeshUDFCPP(mesh: o3d.geometry.TriangleMesh) -> np.ndarray:
+        return toMeshUDFCPP(mesh)
 
     @staticmethod
     def toUDFPcd(udf: np.ndarray, dist_max: float = 0.02) -> np.ndarray:
