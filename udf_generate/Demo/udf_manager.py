@@ -10,7 +10,7 @@ def demo_pcd():
     home = os.environ["HOME"]
     mesh_file_path = home + "/chLi/Dataset/vae-eval/mesh/000.obj"
     save_udf_file_path = home + "/chLi/Dataset/vae-eval/udf/000.npy"
-    dist_max = 0.005
+    dist_max = 0.001
     overwrite = True
 
     mesh = o3d.io.read_triangle_mesh(mesh_file_path)

@@ -4,7 +4,7 @@ import open3d as o3d
 from typing import Union
 
 from udf_generate.Method.io import loadUDF, saveUDF
-from udf_generate.Method.pts_udf import toPtsUDF
+from udf_generate.Method.pts_udf import toPtsUDF, toPtsUDFKDTree
 from udf_generate.Method.mesh_udf import toMeshUDF, toMeshUDFCPP
 from udf_generate.Method.render import toUDFPcd, renderUDF
 
@@ -25,9 +25,18 @@ class UDFManager(object):
         return toPtsUDF(pts)
 
     @staticmethod
+    def toPtsUDFKDTree(pts: np.ndarray) -> np.ndarray:
+        return toPtsUDFKDTree(pts)
+
+    @staticmethod
     def toPcdUDF(pcd: o3d.geometry.PointCloud) -> np.ndarray:
         pts = np.asarray(pcd.points)
         return UDFManager.toPtsUDF(pts)
+
+    @staticmethod
+    def toPcdUDFKDTree(pcd: o3d.geometry.PointCloud) -> np.ndarray:
+        pts = np.asarray(pcd.points)
+        return UDFManager.toPtsUDFKDTree(pts)
 
     @staticmethod
     def toMeshUDF(mesh: o3d.geometry.TriangleMesh) -> np.ndarray:
